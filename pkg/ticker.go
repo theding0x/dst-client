@@ -85,14 +85,18 @@ func (c *Client) NewTicker(name string, crypto bool, ticker string, color bool, 
 	return err
 }
 
-func (c *Client) GetTicker(ticker string) (Ticker, error) {
-	var tickerObj Ticker
-	req, err := http.NewRequest("GET", c.BaseURL+"/ticker/"+ticker, nil)
+func (c *Client) GetTicker(ticker string) (*Ticker, error) {
+	tickerList, err := c.GetTickers()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Error creating request")
+		log.Error().Err(err).Msg("Error getting tickers")
+		return nil, err
 	}
-	err = c.SendRequest(req, &tickerObj)
-	return tickerObj, err
+	for _, t := range tickerList {
+		if t.Ticker == ticker {
+			return &t, nil
+		}
+	}
+	return nil, nil
 }
 
 func (c *Client) GetTickers() (map[string]Ticker, error) {
